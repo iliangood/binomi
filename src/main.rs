@@ -1,6 +1,7 @@
 use num_bigint::BigInt;
 use num_rational::BigRational;
 use num_traits::ToPrimitive;
+// use clap
 
 use rayon::prelude::*;
 use std::{
@@ -33,10 +34,7 @@ fn multi_factorial(num: usize) -> BigInt {
     if num < 2 {
         return BigInt::from(1);
     }
-    (2..=num)
-        .into_par_iter()
-        .map(BigInt::from)
-        .reduce(|| BigInt::from(1), |acc, cur| acc * cur)
+    (2..=num).into_par_iter().map(BigInt::from).product()
 }
 
 struct MemCombinations {
