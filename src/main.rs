@@ -11,35 +11,23 @@ use std::{
 };
 
 struct MemFactorial {
-    facts: Option<Vec<BigInt>>,
+    facts: Vec<BigInt>,
 }
 impl MemFactorial {
     fn new() -> MemFactorial {
         MemFactorial {
-            facts: Some(vec![BigInt::from(1), BigInt::from(1)]),
+            facts: vec![BigInt::from(1), BigInt::from(1)],
         }
     }
-    fn calc(&mut self, num: usize) -> Option<BigInt> {
-        let mut facts = self
-            .facts
-            .take()
-            .unwrap_or(vec![BigInt::from(1), BigInt::from(1)]);
-        if facts.len() > num {
-            return std::panic::catch_unwind(|| facts[num].clone()).ok();
+    fn calc(&mut self, num: usize) -> BigInt {
+        if self.facts.len() > num {
+            return self.facts[num].clone();
         }
-        facts.try_reserve(num.saturating_sub(facts.len())).ok()?;
-        self.facts = std::panic::catch_unwind(move || {
-            for i in facts.len()..=num {
-                facts.push(facts.last().unwrap() * BigInt::from(i));
-            }
-            facts
-        })
-        .ok();
-        if let Some(facts) = &self.facts {
-            facts.last().cloned()
-        } else {
-            None
+        for i in self.facts.len()..=num {
+            self.facts
+                .push(self.facts.last().unwrap().clone() * BigInt::from(i));
         }
+        self.facts.last().unwrap().clone()
     }
 }
 
@@ -96,12 +84,11 @@ impl SmartFactorial {
         }
     }
     fn calc(&mut self, num: usize) -> BigInt {
-        if num <= self.mem_limit
-            && let Some(res) = self.mem_factorial.calc(num)
-        {
-            return res;
+        if num <= self.mem_limit {
+            self.mem_factorial.calc(num)
+        } else {
+            multi_factorial(num).unwrap_or(simple_factorial(num))
         }
-        multi_factorial(num).unwrap_or(simple_factorial(num))
     }
 }
 
